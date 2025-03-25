@@ -8,6 +8,7 @@
 #include <linux/init.h>
 #include <linux/kernel.h>   
 #include <linux/proc_fs.h>
+#include <linux/version.h>
 #include <asm/uaccess.h>
 #define BUFSIZE  100
 
@@ -60,12 +61,20 @@ static ssize_t myread(struct file *file, char __user *ubuf,size_t count, loff_t 
     return len;
 }
 
-static struct file_operations myops = 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
+static struct proc_ops myops =
+{
+    .proc_read  = myread,
+    .proc_write = mywrite,
+};
+#else
+static struct file_operations myops =
 {
     .owner = THIS_MODULE,
     .read = myread,
     .write = mywrite,
 };
+#endif
 
 static int simple_init(void)
 {
